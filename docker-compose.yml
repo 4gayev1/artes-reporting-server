@@ -1,5 +1,5 @@
 services:
-  backend:
+  artes-service:
     build: ./artes-service
     container_name: artes-service
     restart: unless-stopped
@@ -11,14 +11,14 @@ services:
       - db
       - minio
 
-  frontend:
+  artes-ui:
     build: ./artes-ui
     container_name: artes-ui
     restart: unless-stopped
     ports:
       - "4009:4009"
     depends_on:
-      - backend
+      - artes-service
 
   db:
     image: postgres:15
