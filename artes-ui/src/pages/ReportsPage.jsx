@@ -37,6 +37,16 @@ export default function ReportsPage() {
   const [animateMode, setAnimateMode] = useState(false);
   const [layout, setLayout] = useState("table"); 
 
+  const [debouncedName, setDebouncedName] = useState(filters.name);
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      handleFilterChange("name", debouncedName);
+    }, 500); 
+  
+    return () => clearTimeout(handler); 
+  }, [debouncedName]);
+
   useEffect(() => {
 
     const fetchLogo = async () => {
@@ -151,8 +161,8 @@ export default function ReportsPage() {
             <input
               type="text"
               placeholder="Report Name"
-              value={filters.name}
-              onChange={(e) => handleFilterChange("name", e.target.value)}
+              value={debouncedName}
+              onChange={(e) => setDebouncedName(e.target.value)}
               className={`p-3 pl-12 pr-10 rounded-lg border shadow-md w-full transition-colors duration-500
                 ${darkMode ? "bg-gray-800 text-gray-100 border-gray-700" : "bg-white text-gray-900 border-gray-400"}`}
             />
