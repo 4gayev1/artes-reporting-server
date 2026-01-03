@@ -2,7 +2,7 @@
   <img alt="artesLogo" src="https://github.com/user-attachments/assets/e0641011-0e96-4330-8ad5-935b395b0838" width="280">
 </p>
 
-<h1 align="center">Artes Reporting Server</h1>
+<h1 align="center">Artes Reporting System</h1>
 
 ![Docker](https://img.shields.io/badge/docker-ready-blue)
 ![Node.js](https://img.shields.io/badge/nodejs-backend-green)
@@ -10,7 +10,7 @@
 ![MinIO](https://img.shields.io/badge/minio-object--storage-orange)
 ![License](https://img.shields.io/badge/license-internal-lightgrey)
 
-**Artes Reporting Server** is a lightweight report hosting platform for QA and automation teams.
+**Artes Reporting System** is a lightweight report hosting platform for QA and automation teams.
 It allows uploading, storing, filtering, and previewing **HTML** and **Allure** reports via **UI** or **REST API**.
 
 ---
@@ -325,8 +325,8 @@ If you want to change behavior, logic, UI, or defaults, you need to rebuild the 
 #### 1️⃣ Clone the Repository
 
 ```bash
-git clone https://github.com/4gayev1/artes-reporting-server.git
-cd artes-reporting-server
+git clone https://github.com/4gayev1/artes-reporting-system.git
+cd artes-reporting-system
 ```
 
 ---
@@ -391,7 +391,7 @@ db:
 
 ---
 
-Your customized Artes Reporting Server is now running with your own images 🚀
+Your customized Artes Reporting System is now running with your own images 🚀
 
 ---
 
@@ -400,6 +400,6 @@ Your customized Artes Reporting Server is now running with your own images 🚀
 To modify or extend the project:
 
 👉 **GitHub Repository**
-[artes-reporting-server](https://github.com/4gayev1/artes-reporting-server)
+[artes-reporting-system](https://github.com/4gayev1/artes-reporting-system)
 
 ---
