@@ -16,19 +16,19 @@ It allows uploading, storing, filtering, and previewing **HTML** and **Allure** 
 ---
 
 ##  Reports List
-<img width="1508" height="820" alt="image" src="https://github.com/user-attachments/assets/b4c5d931-ef09-4ebd-b727-3d974a91b458" />
+<img width="1512" height="824" alt="image" src="https://github.com/user-attachments/assets/42a1e2ab-9ff0-4147-89f5-8d0874259b3b" />
 
 ### List/grid layout
-<img width="1510" height="821" alt="image" src="https://github.com/user-attachments/assets/f0d3ea1d-3b9a-48b3-b23e-cb97a9bad872" />
+<img width="1512" height="823" alt="image" src="https://github.com/user-attachments/assets/0f209d9f-151f-4419-8f9c-be09692ae123" />
 
 ### Dark/light mode
-<img width="1511" height="823" alt="image" src="https://github.com/user-attachments/assets/c9217612-b471-4dff-a6e1-839d68d0a296" />
+<img width="1512" height="821" alt="image" src="https://github.com/user-attachments/assets/d9f5a0a7-9953-4f08-a2df-640a2934424a" />
 
 ## Upload Report 
-<img width="1512" height="817" alt="image" src="https://github.com/user-attachments/assets/0db92353-e3b7-4d4b-ac96-1c465a315066" />
+<img width="1512" height="813" alt="image" src="https://github.com/user-attachments/assets/352fd134-07e5-4261-a376-33c7db8e126b" />
 
 ## Report Preview
-<img width="1510" height="823" alt="image" src="https://github.com/user-attachments/assets/6cd2b042-e6e6-4a2c-92be-2f5ba932dde7" />
+<img width="1512" height="826" alt="image" src="https://github.com/user-attachments/assets/4469010c-721f-4a2a-9a23-0118fd71d781" />
 
 ---
 
@@ -220,7 +220,7 @@ DELETE /reports?project=mobile&type=ui
 ```yaml
 services:
 
-  backend:
+  artes-service:
     image: vahidaghayev/artes-report-service:latest
     container_name: artes-service
     restart: unless-stopped
@@ -232,14 +232,14 @@ services:
       - db
       - minio
 
-  frontend:
+  artes-ui:
     image: vahidaghayev/artes-report-ui:latest
     container_name: artes-ui
     restart: unless-stopped
     ports:
       - "80:80"
     depends_on:
-      - backend
+      - artes-service
 
   db:
     image: vahidaghayev/artes-db
