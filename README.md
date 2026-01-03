@@ -16,7 +16,7 @@ It allows uploading, storing, filtering, and previewing **HTML** and **Allure** 
 ---
 
 ##  Reports List
-<img width="1512" height="824" alt="image" src="https://github.com/user-attachments/assets/42a1e2ab-9ff0-4147-89f5-8d0874259b3b" />
+<img width="1512" height="817" alt="image" src="https://github.com/user-attachments/assets/75035251-9235-4c3c-b932-0afd9cfa3f07" />
 
 ### List/grid layout
 <img width="1512" height="823" alt="image" src="https://github.com/user-attachments/assets/0f209d9f-151f-4419-8f9c-be09692ae123" />
