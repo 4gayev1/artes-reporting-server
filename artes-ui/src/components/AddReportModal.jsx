@@ -16,7 +16,7 @@ export default function AddReportModal({
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !file)
-      return alert("All fields are required!");
+      return alert("Name and file fields are required!");
     const formData = new FormData();
     formData.append("file", file);
     formData.append("name", name);
