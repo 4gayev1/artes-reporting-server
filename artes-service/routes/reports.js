@@ -1,0 +1,36 @@
+const express = require("express");
+const multer = require("multer");
+
+const { checkHealth } = require("../controllers/healthChecker");
+const { getById } = require("../controllers/getById");
+const { getAll } = require("../controllers/getAll");
+const { getLogoURL } = require("../controllers/getLogoURL");
+const { getLogo } = require("../controllers/getLogo");
+const { getTypes } = require("../controllers/getTypes");
+const { getProjects } = require("../controllers/getProjects");
+
+const { uploadLogo } = require("../controllers/uploadLogo");
+const { uploadReport } = require("../controllers/uploadReport");
+
+const { deleteById } = require("../controllers/deleteById");
+const { deleteAll } = require("../controllers/deleteAll");
+
+const router = express.Router();
+const upload = multer({ storage: multer.memoryStorage() });
+
+router.get("/", checkHealth);
+
+router.get("/logo", getLogo);
+router.get("/logo-url", getLogoURL);
+router.get("/reports", getAll);
+router.get("/preview/:id", getById);
+router.get("/types", getTypes);
+router.get("/projects", getProjects);
+
+router.post("/report", upload.single("file"), uploadReport);
+router.post("/logo", upload.single("file"), uploadLogo);
+
+router.delete("/report/:id", deleteById);
+router.delete("/reports", deleteAll);
+
+module.exports = router;
