@@ -9,9 +9,9 @@ const app = express();
 app.use(cors());
 app.use(express.json());
 
-app.use("/api", reportsRouter);
+app.use("/", reportsRouter);
 
-app.use("/api/preview", express.static(path.join(__dirname, "temp")));
+app.use("/preview", express.static(path.join(__dirname, "temp")));
 
 const PORT = 4010;
 app.listen(PORT, () => console.log(`Backend running on port ${PORT}`));
