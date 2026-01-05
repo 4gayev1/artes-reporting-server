@@ -37,7 +37,8 @@ export default function ReportsPage() {
   const [animateMode, setAnimateMode] = useState(false);
   const [layout, setLayout] = useState("table"); 
   const [debouncedName, setDebouncedName] = useState(filters.name);
-  const [loadingReportId, setLoadingReportId] = useState(null); // loader state
+  const [isOpeningReport, setIsOpeningReport] = useState(false);
+
 
   useEffect(() => {
     const handler = setTimeout(() => {
@@ -91,8 +92,8 @@ export default function ReportsPage() {
   const toggleLayout = () => setLayout(layout === "grid" ? "table" : "grid");
 
   return (
-    <div className={`relative min-h-screen transition-colors duration-500 overflow-hidden`}>
-      {animateMode && (
+<div className="relative min-h-screen overflow-hidden">
+{animateMode && (
         <span className="absolute top-0 right-0 w-12 h-12 rounded-full z-50 animate-circle"></span>
       )}
 
@@ -260,21 +261,22 @@ export default function ReportsPage() {
                   ${darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"}`}
               >
                 <button
-                  onClick={async () => {
-                    try {
-                      setLoadingReportId(r.id);
-                      const res = await getReportById(r.id);
-                      window.open(res.data.url, "_blank");
-                    } finally {
-                      setLoadingReportId(null);
-                    }
-                  }}
+                 onClick={async () => {
+                  if (isOpeningReport) return;
+                
+                  try {
+                    setIsOpeningReport(true);
+                    const res = await getReportById(r.id);
+                    window.open(res.data.url, "_blank");
+                  } catch (e) {
+                    console.error(e);
+                  } finally {
+                    setIsOpeningReport(false);
+                  }
+                }}
                   className="flex items-center text-xl font-bold text-blue-400 hover:text-blue-300 bg-transparent border-0 p-0 cursor-pointer"
                 >
                   {r.name}
-                  {loadingReportId === r.id && (
-                    <span className="ml-2 animate-spin border-2 border-blue-400 border-t-transparent rounded-full w-4 h-4"></span>
-                  )}
                 </button>
                 <div
                   className={`mt-2 space-y-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`}
@@ -320,22 +322,23 @@ export default function ReportsPage() {
                   >
                     <td className="p-3 text-center">
                       <button
-                        onClick={async () => {
-                          try {
-                            setLoadingReportId(r.id);
-                            const res = await getReportById(r.id);
-                            window.open(res.data.url, "_blank");
-                          } finally {
-                            setLoadingReportId(null);
-                          }
-                        }}
+                       onClick={async () => {
+  if (isOpeningReport) return;
+
+  try {
+    setIsOpeningReport(true);
+    const res = await getReportById(r.id);
+    window.open(res.data.url, "_blank");
+  } catch (e) {
+    console.error(e);
+  } finally {
+    setIsOpeningReport(false);
+  }
+}}
                         className="flex items-center justify-center font-bold text-blue-400 hover:text-blue-300 bg-transparent border-0 p-0 cursor-pointer truncate"
                         title={r.name}
                       >
                         {r.name}
-                        {loadingReportId === r.id && (
-                          <span className="ml-2 animate-spin border-2 border-blue-400 border-t-transparent rounded-full w-4 h-4"></span>
-                        )}
                       </button>
                     </td>
                     <td className="text-center">{r.project}</td>
@@ -349,6 +352,17 @@ export default function ReportsPage() {
             </table>
           </div>
         )}
+
+{isOpeningReport && (
+  <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/30">
+    <div className="flex flex-col items-center gap-6">
+    <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
+    <p className="text-white text-2xl font-bold tracking-wide">
+        Opening report…
+      </p>
+    </div>
+  </div>
+)}
 
         {showModal && (
           <AddReportModal
