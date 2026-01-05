@@ -60,7 +60,7 @@ Upload a single `.html` file and view it directly in the browser.
 ## 🏗️ System Architecture
 
 ```text
-   UI 
+UI(nginx) 
    |
 Backend (Node.js / Express)
    |
@@ -219,50 +219,53 @@ DELETE /reports?project=mobile&type=ui
 
 ```yaml
 services:
-
   artes-service:
     image: vahidaghayev/artes-report-service:latest
-    container_name: artes-service
     restart: unless-stopped
-    ports:
-      - "4010:4010"
+    expose:
+      - "4010"
     volumes:
-      - ./src/temp:/usr/src/app/src/temp  
+      - ./src/temp:/usr/src/app/src/temp
     depends_on:
       - db
       - minio
 
   artes-ui:
     image: vahidaghayev/artes-report-ui:latest
-    container_name: artes-ui
+    restart: unless-stopped
+    expose:
+      - "80"
+    depends_on:
+      - artes-service
+
+  nginx:
+    image: vahidaghayev/artes-nginx:latest
     restart: unless-stopped
     ports:
       - "80:80"
     depends_on:
+      - artes-ui
       - artes-service
 
   db:
-    image: vahidaghayev/artes-db
-    container_name: artes-db
+    image: vahidaghayev/artes-db:latest
+    restart: unless-stopped
     environment:
       POSTGRES_DB: artes_reports
       POSTGRES_USER: artes
       POSTGRES_PASSWORD: artes
-    ports:
-      - "5432:5432"
     volumes:
       - db_data:/var/lib/postgresql/data
 
   minio:
     image: minio/minio
-    container_name: artes-minio
+    restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: artes
       MINIO_ROOT_PASSWORD: artes123
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9001:9001"   # console only
     volumes:
       - minio_data:/data
 
@@ -291,20 +294,23 @@ docker compose up --build
 
 ---
 
-## 🌐 Default URLs
+## 🌐 Default Ports
 
-| Service       | URL                                            |
-| ------------- | ---------------------------------------------- |
-| Backend API   | [http://localhost:4010](http://localhost:4010) |
-| UI            | [http://localhost:80](http://localhost:80)     |
-| MinIO Console | [http://localhost:9001](http://localhost:9001) |
-| PostgreSQL    | localhost:5432                                 |
+| Service       | Ports      |
+| ------------- | ---------- |
+| Backend API   | 4010       |
+| UI            | 80         |
+| MinIO Console | 9001       |
+| PostgreSQL    | 5432       |
 
 ---
 
 ## 🐳 Docker Images
 
-### DataBase
+### Nginx
+* **Image:** [`vahidaghayev/artes-nginx`](https://hub.docker.com/r/vahidaghayev/artes-nginx)
+
+### Database
 * **Image:** [`vahidaghayev/artes-db`](https://hub.docker.com/r/vahidaghayev/artes-db)
 
 ### Backend (API)
@@ -342,6 +348,15 @@ cd artes-reporting-system
 #### 3️⃣ Build & Push Multi-Architecture Images
 
 > The following commands build images for **linux/amd64** and **linux/arm64** and push them to Docker Hub.
+
+##### Nginx Image
+
+```bash
+docker buildx build \
+  --platform=linux/amd64,linux/arm64 \
+  -t yourDockerHubUser/artes-nginx \
+  --push .
+```
 
 ##### Database Image
 
@@ -384,6 +399,9 @@ backend:
 
 frontend:
   image: yourDockerHubUser/artes-report-ui
+
+nginx:
+  image: yourDockerHubUser/artes-nginx
 
 db:
   image: yourDockerHubUser/artes-db

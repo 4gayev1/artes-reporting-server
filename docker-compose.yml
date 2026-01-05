@@ -1,10 +1,11 @@
+version: "3.9"
+
 services:
   artes-service:
-    build: ./artes-service
-    container_name: artes-service
+    build: ./service
     restart: unless-stopped
-    ports:
-      - "4010:4010"
+    expose:
+      - "4010"
     volumes:
       - ./src/temp:/usr/src/app/src/temp
     depends_on:
@@ -12,36 +13,42 @@ services:
       - minio
 
   artes-ui:
-    build: ./artes-ui
-    container_name: artes-ui
+    build: ./ui
     restart: unless-stopped
-    ports:
-      - "4009:4009"
+    expose:
+      - "80"
     depends_on:
       - artes-service
 
+  nginx:
+    build: ./nginx
+    container_name: artes-nginx
+    restart: unless-stopped
+    ports:
+      - "80:80"
+    depends_on:
+      - artes-ui
+      - artes-service
+
   db:
-    image: ./artes-db
-    container_name: artes-db
+    build: ./db
+    restart: unless-stopped
     environment:
       POSTGRES_DB: artes_reports
       POSTGRES_USER: artes
       POSTGRES_PASSWORD: artes
-    ports:
-      - "5432:5432"
     volumes:
       - pg_data:/var/lib/postgresql/data
 
   minio:
     image: minio/minio
-    container_name: artes-minio
+    restart: unless-stopped
     command: server /data --console-address ":9001"
     environment:
       MINIO_ROOT_USER: artes
       MINIO_ROOT_PASSWORD: artes123
     ports:
-      - "9000:9000"
-      - "9001:9001"
+      - "9001:9001"   # console only
     volumes:
       - minio_data:/data
 
