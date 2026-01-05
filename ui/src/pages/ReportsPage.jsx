@@ -110,7 +110,7 @@ export default function ReportsPage() {
             <img
               src={logoUrl}
               alt="Logo"
-              className="h-20 rounded-md shadow-lg"
+              className="h-20 rounded-md"
             />
             <h1 className="text-3xl font-bold">Reports Dashboard</h1>
           </div>
