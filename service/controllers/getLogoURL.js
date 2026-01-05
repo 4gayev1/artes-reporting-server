@@ -1,6 +1,6 @@
 async function getLogoURL(req, res) {
   try {
-      const url =  await `${req.protocol}://${req.get("host")}/logo`;
+      const url =  await `${req.protocol}://${req.get("host")}/api/logo`;
         return await res.json({ 
             url: url
         });
