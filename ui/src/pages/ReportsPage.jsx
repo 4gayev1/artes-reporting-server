@@ -1,5 +1,5 @@
 import { useEffect, useState } from "react";
-import  {
+import {
   getReports,
   getProjects,
   getReportById,
@@ -36,24 +36,22 @@ export default function ReportsPage() {
   const [darkMode, setDarkMode] = useState(true);
   const [animateMode, setAnimateMode] = useState(false);
   const [layout, setLayout] = useState("table"); 
-
   const [debouncedName, setDebouncedName] = useState(filters.name);
+  const [loadingReportId, setLoadingReportId] = useState(null); // loader state
 
   useEffect(() => {
     const handler = setTimeout(() => {
       handleFilterChange("name", debouncedName);
     }, 500); 
-  
     return () => clearTimeout(handler); 
   }, [debouncedName]);
 
   useEffect(() => {
-
     const fetchLogo = async () => {
       const res = await getLogoURL();
       setLogoUrl(res.data.url);
-    }
-    fetchLogo()
+    };
+    fetchLogo();
 
     const fetchDropdowns = async () => {
       const projRes = await getProjects();
@@ -93,10 +91,7 @@ export default function ReportsPage() {
   const toggleLayout = () => setLayout(layout === "grid" ? "table" : "grid");
 
   return (
-    <div
-      className={`relative min-h-screen transition-colors duration-500 overflow-hidden`}
-    >
-      {/* Soft-edge circle animation */}
+    <div className={`relative min-h-screen transition-colors duration-500 overflow-hidden`}>
       {animateMode && (
         <span className="absolute top-0 right-0 w-12 h-12 rounded-full z-50 animate-circle"></span>
       )}
@@ -107,11 +102,7 @@ export default function ReportsPage() {
         {/* Header */}
         <header className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
           <div className="flex items-center gap-4">
-            <img
-              src={logoUrl}
-              alt="Logo"
-              className="h-20 rounded-md"
-            />
+            <img src={logoUrl} alt="Logo" className="h-20 rounded-md" />
             <h1 className="text-3xl font-bold">Reports Dashboard</h1>
           </div>
 
@@ -123,11 +114,7 @@ export default function ReportsPage() {
               className={`flex items-center justify-center w-12 h-12 rounded-full transition-colors duration-500 shadow-lg relative overflow-hidden
                 ${darkMode ? "bg-gray-700 hover:bg-gray-600 text-white" : "bg-gray-200 hover:bg-gray-300 text-gray-800"}`}
             >
-              {darkMode ? (
-                <FiMoon className="text-xl" />
-              ) : (
-                <FiSun className="text-xl" />
-              )}
+              {darkMode ? <FiMoon className="text-xl" /> : <FiSun className="text-xl" />}
             </button>
 
             {/* Layout Toggle */}
@@ -137,11 +124,7 @@ export default function ReportsPage() {
                 ${darkMode ? "bg-gray-700 hover:bg-gray-600 text-white" : "bg-gray-200 hover:bg-gray-300 text-gray-800"}`}
               title={`Switch to ${layout === "grid" ? "Grid" : "Table"} View`}
             >
-              {layout === "grid" ? (
-                <FiList className="text-xl" />
-              ) : (
-                <FiGrid className="text-xl" />
-              )}
+              {layout === "grid" ? <FiList className="text-xl" /> : <FiGrid className="text-xl" />}
             </button>
 
             {/* Add Report */}
@@ -227,9 +210,7 @@ export default function ReportsPage() {
           <div className="relative flex-1 min-w-[220px] max-w-[350px] flex gap-2 cursor-pointer">
             <div
               className="relative flex-1"
-              onClick={() =>
-                document.getElementById("fromDateInput")?.showPicker?.()
-              }
+              onClick={() => document.getElementById("fromDateInput")?.showPicker?.()}
             >
               <input
                 id="fromDateInput"
@@ -244,9 +225,7 @@ export default function ReportsPage() {
 
             <div
               className="relative flex-1"
-              onClick={() =>
-                document.getElementById("toDateInput")?.showPicker?.()
-              }
+              onClick={() => document.getElementById("toDateInput")?.showPicker?.()}
             >
               <input
                 id="toDateInput"
@@ -280,19 +259,23 @@ export default function ReportsPage() {
                 className={`rounded-xl shadow-lg p-5 relative transition-colors duration-500
                   ${darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"}`}
               >
-               <button
-                      onClick={async () => {
-                        const res = await getReportById(r.id);
-                        console.log(res.data.url)
-                        window.open(
-                          res.data.url,
-                          "_blank",
-                        );
-                      }}
-                      className="text-xl font-bold text-blue-400 hover:text-blue-300  bg-transparent border-0 p-0 cursor-pointer"
-                    >
-                      {r.name}
-                    </button>
+                <button
+                  onClick={async () => {
+                    try {
+                      setLoadingReportId(r.id);
+                      const res = await getReportById(r.id);
+                      window.open(res.data.url, "_blank");
+                    } finally {
+                      setLoadingReportId(null);
+                    }
+                  }}
+                  className="flex items-center text-xl font-bold text-blue-400 hover:text-blue-300 bg-transparent border-0 p-0 cursor-pointer"
+                >
+                  {r.name}
+                  {loadingReportId === r.id && (
+                    <span className="ml-2 animate-spin border-2 border-blue-400 border-t-transparent rounded-full w-4 h-4"></span>
+                  )}
+                </button>
                 <div
                   className={`mt-2 space-y-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`}
                 >
@@ -316,17 +299,11 @@ export default function ReportsPage() {
             <table
               className={`w-full border-collapse rounded-lg overflow-hidden shadow-md
               transition-colors duration-500
-              ${darkMode
-                ? "bg-gray-800 text-gray-100 border border-gray-700"
-                : "bg-white text-gray-900 border border-gray-300"
-              }`}
+              ${darkMode ? "bg-gray-800 text-gray-100 border border-gray-700" : "bg-white text-gray-900 border border-gray-300"}`}
             >
               <thead>
                 <tr
-                  className={`${darkMode
-                    ? "bg-gray-700 text-gray-100"
-                    : "bg-gray-100 text-gray-900"
-                  }`}
+                  className={`${darkMode ? "bg-gray-700 text-gray-100" : "bg-gray-100 text-gray-900"}`}
                 >
                   <th className="p-3 text-center">Name</th>
                   <th className="p-3 text-center">Project</th>
@@ -334,39 +311,43 @@ export default function ReportsPage() {
                   <th className="p-3 text-center">Date</th>
                 </tr>
               </thead>
-    
-              <tbody >
+
+              <tbody>
                 {reports?.reports?.map((r) => (
                   <tr
                     key={r.id}
-                    className={`${darkMode
-                      ? "hover:bg-gray-700 border-gray-700"
-                      : "hover:bg-gray-50 border-gray-300"
-                    } border-b`}
+                    className={`${darkMode ? "hover:bg-gray-700 border-gray-700" : "hover:bg-gray-50 border-gray-300"} border-b`}
                   >
                     <td className="p-3 text-center">
                       <button
                         onClick={async () => {
-                          const res = await getReportById(r.id);
-                          window.open(res.data.url, "_blank");
+                          try {
+                            setLoadingReportId(r.id);
+                            const res = await getReportById(r.id);
+                            window.open(res.data.url, "_blank");
+                          } finally {
+                            setLoadingReportId(null);
+                          }
                         }}
-                        className="font-bold text-blue-400 hover:text-blue-300 bg-transparent border-0 p-0 cursor-pointer truncate"
+                        className="flex items-center justify-center font-bold text-blue-400 hover:text-blue-300 bg-transparent border-0 p-0 cursor-pointer truncate"
                         title={r.name}
                       >
                         {r.name}
+                        {loadingReportId === r.id && (
+                          <span className="ml-2 animate-spin border-2 border-blue-400 border-t-transparent rounded-full w-4 h-4"></span>
+                        )}
                       </button>
                     </td>
-    
-                    <td className=" text-center">{r.project}</td>
-                    <td className=" text-center">{r.type}</td>
-                    <td className=" text-center">
+                    <td className="text-center">{r.project}</td>
+                    <td className="text-center">{r.type}</td>
+                    <td className="text-center">
                       {dayjs(r.upload_date).format("YYYY-MM-DD HH:mm:ss")}
                     </td>
                   </tr>
                 ))}
               </tbody>
             </table>
-        </div>
+          </div>
         )}
 
         {showModal && (
@@ -382,14 +363,8 @@ export default function ReportsPage() {
       {/* Animations */}
       <style jsx>{`
         @keyframes circle-expand {
-          0% {
-            transform: scale(0);
-            opacity: 0.5;
-          }
-          100% {
-            transform: scale(80);
-            opacity: 0;
-          }
+          0% { transform: scale(0); opacity: 0.5; }
+          100% { transform: scale(80); opacity: 0; }
         }
         .animate-circle {
           position: absolute;
@@ -402,6 +377,13 @@ export default function ReportsPage() {
           z-index: 50;
           animation: circle-expand 0.7s cubic-bezier(0.4, 0, 0.2, 1) forwards;
           pointer-events: none;
+        }
+        .animate-spin {
+          animation: spin 0.8s linear infinite;
+        }
+        @keyframes spin {
+          0% { transform: rotate(0deg); }
+          100% { transform: rotate(360deg); }
         }
       `}</style>
     </div>
