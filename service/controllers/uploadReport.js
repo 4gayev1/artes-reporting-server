@@ -20,15 +20,17 @@ async function uploadReport(req, res) {
 
     await minioClient.putObject("artes-reports", objectName, reportFile.buffer);
 
-    const fileUrl = `http://${MinioConf.endPoint}:${MinioConf.port}/${"artes-reports"}/${objectName}`;
+    const minioUrl = `http://${MinioConf.endPoint}:${MinioConf.port}/${"artes-reports"}/${objectName}`;
+
+    const reportUrl = `${req.protocol}://${req.get("host")}/api/preview/${id}`;
 
     const query = `
-      INSERT INTO reports (id, type, name, file_url, project)
-      VALUES ($1, $2, $3, $4, $5)
+      INSERT INTO reports (id, type, name, minio_url ,report_url, project)
+      VALUES ($1, $2, $3, $4, $5, $6)
       RETURNING *;
     `;
 
-    const result = await pool.query(query, [id, t, name, fileUrl, proj]);
+    const result = await pool.query(query, [id, t, name, minioUrl, reportUrl, proj]);
 
     res.json({
       message: "Report uploaded successfully",

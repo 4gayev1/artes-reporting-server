@@ -34,7 +34,7 @@ async function getById(req, res) {
       const zip = new AdmZip(buffer);
       zip.extractAllTo(reportDir, true);
 
-      const url = `${req.protocol}://${req.get("host")}/api/preview/report-${id}/report/index.html`;
+      const url = `${req.protocol}://${req.get("host")}/api/preview/report-${id}/index.html`;
 
       return res.json({ 
         url: url
@@ -45,7 +45,7 @@ async function getById(req, res) {
     if (filename.endsWith(".html")) {
       fs.writeFileSync(path.join(reportDir, "index.html"), buffer);
 
-      const url = `${req.protocol}://${req.get("host")}/api/preview/report-${id}/report/index.html`;
+      const url = `${req.protocol}://${req.get("host")}/api/preview/report-${id}/index.html`;
 
       return res.json({ 
         url: url
