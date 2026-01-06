@@ -1,7 +1,7 @@
 const Minio = require("minio");
 
 const MinioConf = {
-  endPoint: "localhost",
+  endPoint: "minio",
   port: 9000,
   useSSL: false,
   accessKey: "artes",

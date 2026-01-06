@@ -5,10 +5,7 @@ const OBJECT_NAME = "logo";
 
 async function getLogo(req, res) {
   try {
-    const stream = await minioClient.getObject(
-      BUCKET_NAME,
-      OBJECT_NAME
-    );
+    const stream = await minioClient.getObject(BUCKET_NAME, OBJECT_NAME);
 
     res.setHeader("Cache-Control", "public, max-age=86400");
 

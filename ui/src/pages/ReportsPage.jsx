@@ -2,12 +2,11 @@ import { useEffect, useState } from "react";
 import {
   getReports,
   getProjects,
-  getReportById,
   getTypes,
-  deleteReportById,
   getLogoURL,
 } from "../api";
 import dayjs from "dayjs";
+import { useSearchParams } from "react-router-dom";
 import AddReportModal from "../components/AddReportModal";
 import {
   FiX,
@@ -21,79 +20,131 @@ import {
 } from "react-icons/fi";
 
 export default function ReportsPage() {
+
+  const [searchParams, setSearchParams] = useSearchParams();
+
+  /* -------------------- STATE -------------------- */
+
   const [logoUrl, setLogoUrl] = useState();
   const [reports, setReports] = useState([]);
   const [projects, setProjects] = useState([]);
   const [types, setTypes] = useState([]);
-  const [filters, setFilters] = useState({
-    name: "",
-    project: "",
-    type: "",
-    fromDate: "",
-    toDate: "",
-  });
   const [showModal, setShowModal] = useState(false);
   const [darkMode, setDarkMode] = useState(true);
   const [animateMode, setAnimateMode] = useState(false);
-  const [layout, setLayout] = useState("table"); 
+  const [layout, setLayout] = useState("table");
+
+  const [pagination, setPagination] = useState({
+    page: 1,
+    size: 20,
+    total: 0,
+    totalPages: 1,
+  });
+
+
+  const [filters, setFilters] = useState(() => ({
+    name: searchParams.get("name") || "",
+    project: searchParams.get("project") || "",
+    type: searchParams.get("type") || "",
+    fromDate: searchParams.get("fromDate") || "",
+    toDate: searchParams.get("toDate") || "",
+    page: Number(searchParams.get("page")) || 1,
+    size: Number(searchParams.get("size")) || 20,
+  }));
+
   const [debouncedName, setDebouncedName] = useState(filters.name);
-  const [isOpeningReport, setIsOpeningReport] = useState(false);
 
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      handleFilterChange("name", debouncedName);
-    }, 500); 
-    return () => clearTimeout(handler); 
-  }, [debouncedName]);
+  /* -------------------- EFFECTS -------------------- */
 
   useEffect(() => {
-    const fetchLogo = async () => {
-      const res = await getLogoURL();
-      setLogoUrl(res.data.url);
-    };
-    fetchLogo();
+    const init = async () => {
+      const logoRes = await getLogoURL();
+      setLogoUrl(logoRes.data.url);
 
-    const fetchDropdowns = async () => {
       const projRes = await getProjects();
       setProjects(projRes.data);
+
       const typeRes = await getTypes();
       setTypes(typeRes.data);
-    };
-    fetchDropdowns();
 
-    fetchReports(filters);
+      fetchReports(filters);
+    };
+
+    init();
   }, []);
+
+  useEffect(() => {
+    const timeout = setTimeout(() => {
+      if (debouncedName !== filters.name) {
+        handleFilterChange("name", debouncedName);
+      }
+    }, 500);
+
+    return () => clearTimeout(timeout);
+  }, [debouncedName]);
+
+  /* -------------------- HELPERS -------------------- */
 
   const fetchReports = async (filterValues) => {
     const res = await getReports(filterValues);
-    setReports(res.data);
+  
+    setReports(res.data.reports);
+    setPagination({
+      page: res.data.page,
+      size: res.data.size,
+      total: res.data.total,
+      totalPages: res.data.totalPages,
+    });
+  };
+
+  const syncUrl = (filterValues) => {
+    const params = new URLSearchParams();
+    Object.entries(filterValues).forEach(([key, value]) => {
+      if (value !== "" && value !== null) {
+        params.set(key, value);
+      }
+    });
+    setSearchParams(params);
   };
 
   const handleFilterChange = (name, value) => {
-    const newFilters = { ...filters, [name]: value };
+    const newFilters = {
+      ...filters,
+      [name]: value,
+      page: name === "page" ? value : 1,
+    };
+  
     setFilters(newFilters);
+    syncUrl(newFilters);
     fetchReports(newFilters);
   };
 
-  const clearFilter = (name) => handleFilterChange(name, "");
-
-  const handleDelete = async (id) => {
-    await deleteReportById(id);
-    fetchReports(filters);
+  const changePage = (newPage) => {
+    const newFilters = { ...filters, page: newPage };
+    setFilters(newFilters);
+    syncUrl(newFilters);
+    fetchReports(newFilters);
   };
 
+  const clearFilter = (name) => {
+    if (name === "name") {
+      setDebouncedName("");
+    }
+    handleFilterChange(name, "");
+  };
+  
   const toggleDarkMode = () => {
     setAnimateMode(true);
-    setDarkMode(!darkMode);
+    setDarkMode((prev) => !prev);
     setTimeout(() => setAnimateMode(false), 700);
   };
 
-  const toggleLayout = () => setLayout(layout === "grid" ? "table" : "grid");
-
+  const toggleLayout = () =>
+    setLayout((prev) => (prev === "grid" ? "table" : "grid"));
+  
   return (
-<div className="relative min-h-screen overflow-hidden">
-{animateMode && (
+    <div className="relative min-h-screen overflow-hidden">
+      {animateMode && (
         <span className="absolute top-0 right-0 w-12 h-12 rounded-full z-50 animate-circle"></span>
       )}
 
@@ -103,7 +154,9 @@ export default function ReportsPage() {
         {/* Header */}
         <header className="flex flex-col sm:flex-row justify-between items-center mb-8 gap-4">
           <div className="flex items-center gap-4">
-            <img src={logoUrl} alt="Logo" className="h-20 rounded-md" />
+            <a href="/">
+              <img src={logoUrl} alt="Logo" className="h-20 rounded-md" />
+            </a>
             <h1 className="text-3xl font-bold">Reports Dashboard</h1>
           </div>
 
@@ -115,7 +168,11 @@ export default function ReportsPage() {
               className={`flex items-center justify-center w-12 h-12 rounded-full transition-colors duration-500 shadow-lg relative overflow-hidden
                 ${darkMode ? "bg-gray-700 hover:bg-gray-600 text-white" : "bg-gray-200 hover:bg-gray-300 text-gray-800"}`}
             >
-              {darkMode ? <FiMoon className="text-xl" /> : <FiSun className="text-xl" />}
+              {darkMode ? (
+                <FiMoon className="text-xl" />
+              ) : (
+                <FiSun className="text-xl" />
+              )}
             </button>
 
             {/* Layout Toggle */}
@@ -125,7 +182,11 @@ export default function ReportsPage() {
                 ${darkMode ? "bg-gray-700 hover:bg-gray-600 text-white" : "bg-gray-200 hover:bg-gray-300 text-gray-800"}`}
               title={`Switch to ${layout === "grid" ? "Grid" : "Table"} View`}
             >
-              {layout === "grid" ? <FiList className="text-xl" /> : <FiGrid className="text-xl" />}
+              {layout === "grid" ? (
+                <FiList className="text-xl" />
+              ) : (
+                <FiGrid className="text-xl" />
+              )}
             </button>
 
             {/* Add Report */}
@@ -211,7 +272,9 @@ export default function ReportsPage() {
           <div className="relative flex-1 min-w-[220px] max-w-[350px] flex gap-2 cursor-pointer">
             <div
               className="relative flex-1"
-              onClick={() => document.getElementById("fromDateInput")?.showPicker?.()}
+              onClick={() =>
+                document.getElementById("fromDateInput")?.showPicker?.()
+              }
             >
               <input
                 id="fromDateInput"
@@ -226,7 +289,9 @@ export default function ReportsPage() {
 
             <div
               className="relative flex-1"
-              onClick={() => document.getElementById("toDateInput")?.showPicker?.()}
+              onClick={() =>
+                document.getElementById("toDateInput")?.showPicker?.()
+              }
             >
               <input
                 id="toDateInput"
@@ -254,30 +319,20 @@ export default function ReportsPage() {
         {/* Reports Layout */}
         {layout === "grid" ? (
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
-            {reports?.reports?.map((r) => (
+            {reports?.map((r) => (
               <div
                 key={r.id}
                 className={`rounded-xl shadow-lg p-5 relative transition-colors duration-500
                   ${darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"}`}
               >
-                <button
-                 onClick={async () => {
-                  if (isOpeningReport) return;
-                
-                  try {
-                    setIsOpeningReport(true);
-                    const res = await getReportById(r.id);
-                    window.open(res.data.url, "_blank");
-                  } catch (e) {
-                    console.error(e);
-                  } finally {
-                    setIsOpeningReport(false);
-                  }
-                }}
+                <a
+                  href={r.report_url}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="flex items-center text-xl font-bold text-blue-400 hover:text-blue-300 bg-transparent border-0 p-0 cursor-pointer"
                 >
                   {r.name}
-                </button>
+                </a>
                 <div
                   className={`mt-2 space-y-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`}
                 >
@@ -315,31 +370,21 @@ export default function ReportsPage() {
               </thead>
 
               <tbody>
-                {reports?.reports?.map((r) => (
+                {reports?.map((r) => (
                   <tr
                     key={r.id}
                     className={`${darkMode ? "hover:bg-gray-700 border-gray-700" : "hover:bg-gray-50 border-gray-300"} border-b`}
                   >
                     <td className="p-3 text-center">
-                      <button
-                       onClick={async () => {
-  if (isOpeningReport) return;
-
-  try {
-    setIsOpeningReport(true);
-    const res = await getReportById(r.id);
-    window.open(res.data.url, "_blank");
-  } catch (e) {
-    console.error(e);
-  } finally {
-    setIsOpeningReport(false);
-  }
-}}
+                      <a
+                        href={r.report_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
                         className="flex items-center justify-center font-bold text-blue-400 hover:text-blue-300 bg-transparent border-0 p-0 cursor-pointer truncate"
                         title={r.name}
                       >
                         {r.name}
-                      </button>
+                      </a>
                     </td>
                     <td className="text-center">{r.project}</td>
                     <td className="text-center">{r.type}</td>
@@ -353,14 +398,58 @@ export default function ReportsPage() {
           </div>
         )}
 
-{isOpeningReport && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center backdrop-blur-sm bg-black/30">
-    <div className="flex flex-col items-center gap-6">
-    <div className="w-16 h-16 border-4 border-blue-500 border-t-transparent rounded-full animate-spin"></div>
-    <p className="text-white text-2xl font-bold tracking-wide">
-        Opening report…
-      </p>
-    </div>
+{/* Pagination */}
+{pagination.totalPages > 1 && (
+  <div className="flex justify-center items-center gap-2 mt-10">
+    {/* Prev */}
+    <button
+      disabled={pagination.page === 1}
+      onClick={() => changePage(pagination.page - 1)}
+      className={`px-4 py-2 rounded-lg font-medium transition
+        ${
+          darkMode
+            ? "bg-gray-700 text-gray-200 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500"
+            : "bg-gray-200 text-gray-800 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+        }`}
+    >
+      Prev
+    </button>
+
+    {/* Page Numbers */}
+    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
+      (p) => (
+        <button
+          key={p}
+          onClick={() => changePage(p)}
+          className={`w-10 h-10 rounded-lg font-semibold transition
+            ${
+              p === pagination.page
+                ? darkMode
+                  ? "bg-blue-500 text-white"
+                  : "bg-blue-600 text-white"
+                : darkMode
+                ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+            }`}
+        >
+          {p}
+        </button>
+      )
+    )}
+
+    {/* Next */}
+    <button
+      disabled={pagination.page === pagination.totalPages}
+      onClick={() => changePage(pagination.page + 1)}
+      className={`px-4 py-2 rounded-lg font-medium transition
+        ${
+          darkMode
+            ? "bg-gray-700 text-gray-200 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500"
+            : "bg-gray-200 text-gray-800 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
+        }`}
+    >
+      Next
+    </button>
   </div>
 )}
 
@@ -377,8 +466,14 @@ export default function ReportsPage() {
       {/* Animations */}
       <style jsx>{`
         @keyframes circle-expand {
-          0% { transform: scale(0); opacity: 0.5; }
-          100% { transform: scale(80); opacity: 0; }
+          0% {
+            transform: scale(0);
+            opacity: 0.5;
+          }
+          100% {
+            transform: scale(80);
+            opacity: 0;
+          }
         }
         .animate-circle {
           position: absolute;
@@ -396,8 +491,12 @@ export default function ReportsPage() {
           animation: spin 0.8s linear infinite;
         }
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
       `}</style>
     </div>

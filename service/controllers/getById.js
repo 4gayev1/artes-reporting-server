@@ -18,12 +18,12 @@ async function getById(req, res) {
 
     const report = result.rows[0];
 
-    const response = await axios.get(report.file_url, {
+    const response = await axios.get(report.minio_url, {
       responseType: "arraybuffer",
     });
 
     const buffer = Buffer.from(response.data);
-    const filename = report.file_url.split("/").pop().toLowerCase();
+    const filename = report.minio_url.split("/").pop().toLowerCase();
 
     const reportDir = path.join(__dirname, "../temp", `report-${id}`);
 
@@ -34,22 +34,14 @@ async function getById(req, res) {
       const zip = new AdmZip(buffer);
       zip.extractAllTo(reportDir, true);
 
-      const url = `${req.protocol}://${req.get("host")}/api/preview/report-${id}/index.html`;
-
-      return res.json({ 
-        url: url
-      });
-
+      res.redirect(`/api/preview/report-${id}/index.html`);
     }
 
     if (filename.endsWith(".html")) {
       fs.writeFileSync(path.join(reportDir, "index.html"), buffer);
 
-      const url = `${req.protocol}://${req.get("host")}/api/preview/report-${id}/index.html`;
-
-      return res.json({ 
-        url: url
-      });    }
+      res.redirect(`/api/preview/report-${id}/index.html`);
+    }
 
     res.send(buffer);
   } catch (err) {

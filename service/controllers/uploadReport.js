@@ -30,7 +30,14 @@ async function uploadReport(req, res) {
       RETURNING *;
     `;
 
-    const result = await pool.query(query, [id, t, name, minioUrl, reportUrl, proj]);
+    const result = await pool.query(query, [
+      id,
+      t,
+      name,
+      minioUrl,
+      reportUrl,
+      proj,
+    ]);
 
     res.json({
       message: "Report uploaded successfully",

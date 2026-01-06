@@ -34,7 +34,7 @@ services:
     build: ./db
     restart: unless-stopped
     ports:
-      - "5432:5432" 
+      - "5432:5432"
     environment:
       POSTGRES_DB: artes_reports
       POSTGRES_USER: artes
@@ -50,8 +50,8 @@ services:
       MINIO_ROOT_USER: artes
       MINIO_ROOT_PASSWORD: artes123
     ports:
-      - "9000:9000" 
-      - "9001:9001" 
+      - "9000:9000"
+      - "9001:9001"
     volumes:
       - minio_data:/data
 

@@ -15,31 +15,36 @@ It allows uploading, storing, filtering, and previewing **HTML** and **Allure** 
 
 ---
 
-##  Reports List
+## Reports List
+
 <img width="1512" height="817" alt="image" src="https://github.com/user-attachments/assets/75035251-9235-4c3c-b932-0afd9cfa3f07" />
 
 ### List/grid layout
+
 <img width="1512" height="823" alt="image" src="https://github.com/user-attachments/assets/0f209d9f-151f-4419-8f9c-be09692ae123" />
 
 ### Dark/light mode
+
 <img width="1512" height="821" alt="image" src="https://github.com/user-attachments/assets/d9f5a0a7-9953-4f08-a2df-640a2934424a" />
 
-## Upload Report 
+## Upload Report
+
 <img width="1512" height="813" alt="image" src="https://github.com/user-attachments/assets/352fd134-07e5-4261-a376-33c7db8e126b" />
 
 ## Report Preview
+
 <img width="1512" height="826" alt="image" src="https://github.com/user-attachments/assets/4469010c-721f-4a2a-9a23-0118fd71d781" />
 
 ---
 
 ## ✨ Features
 
-* 📄 Upload and preview **HTML reports**
-* 📦 Upload **Allure reports** as ZIP files
-* 🌐 Browser-based report preview
-* 🔍 Filter reports by project, name, type, and date
-* 🗑️ Delete single or multiple reports
-* 🐳 Fully Dockerized (Backend, UI, DB, Storage)
+- 📄 Upload and preview **HTML reports**
+- 📦 Upload **Allure reports** as ZIP files
+- 🌐 Browser-based report preview
+- 🔍 Filter reports by project, name, type, and date
+- 🗑️ Delete single or multiple reports
+- 🐳 Fully Dockerized (Backend, UI, DB, Storage)
 
 ---
 
@@ -60,15 +65,15 @@ Upload a single `.html` file and view it directly in the browser.
 ## 🏗️ System Architecture
 
 ```text
-UI(nginx) 
+UI(nginx)
    |
 Backend (Node.js / Express)
    |
 PostgreSQL (metadata) + MinIO (files)
 ```
 
-* **PostgreSQL** stores report metadata
-* **MinIO** stores HTML & ZIP files (S3 compatible)
+- **PostgreSQL** stores report metadata
+- **MinIO** stores HTML & ZIP files (S3 compatible)
 
 ---
 
@@ -121,14 +126,14 @@ GET /reports
 
 #### Optional Filters
 
-| Query Param | Description                    |
-| ----------- | ------------------------------ |
-| project     | Filter by project              |
-| name        | Filter by name                 |
+| Query Param | Description               |
+| ----------- | ------------------------- |
+| project     | Filter by project         |
+| name        | Filter by name            |
 | type        | Report type (`ui`, `api`) |
-| date        | Exact date                     |
-| fromDate    | Start date                     |
-| toDate      | End date                       |
+| date        | Exact date                |
+| fromDate    | Start date                |
+| toDate      | End date                  |
 
 Example:
 
@@ -159,8 +164,8 @@ POST /report
 | Field   | Required | Description        |
 | ------- | -------- | ------------------ |
 | name    | ✅       | Report name        |
-| type    | ❌       | Default: `unknown`   |
-| project | ❌       | Default: `unknown`   |
+| type    | ❌       | Default: `unknown` |
+| project | ❌       | Default: `unknown` |
 | file    | ✅       | HTML file or ZIP   |
 
 ---
@@ -171,8 +176,8 @@ POST /report
 POST /logo
 ```
 
-* Send `multipart/form-data`
-* Only field required: `file`
+- Send `multipart/form-data`
+- Only field required: `file`
 
 ---
 
@@ -194,14 +199,14 @@ DELETE /reports
 
 #### Optional Filters
 
-| Query Param | Description                    |
-| ----------- | ------------------------------ |
-| project     | Filter by project              |
-| name        | Filter by name                 |
+| Query Param | Description               |
+| ----------- | ------------------------- |
+| project     | Filter by project         |
+| name        | Filter by name            |
 | type        | Report type (`ui`, `api`) |
-| date        | Exact date                     |
-| fromDate    | Start date                     |
-| toDate      | End date                       |
+| date        | Exact date                |
+| fromDate    | Start date                |
+| toDate      | End date                  |
 
 Example:
 
@@ -296,30 +301,32 @@ docker compose up --build
 
 ## 🌐 Default Ports
 
-| Service       | Ports      |
-| ------------- | ---------- |
-| Backend API   | 4010       |
-| UI            | 80         |
-| MinIO Console | 9001       |
-| PostgreSQL    | 5432       |
+| Service       | Ports |
+| ------------- | ----- |
+| Backend API   | 4010  |
+| UI            | 80    |
+| MinIO Console | 9001  |
+| PostgreSQL    | 5432  |
 
 ---
 
 ## 🐳 Docker Images
 
 ### Nginx
-* **Image:** [`vahidaghayev/artes-nginx`](https://hub.docker.com/r/vahidaghayev/artes-nginx)
+
+- **Image:** [`vahidaghayev/artes-nginx`](https://hub.docker.com/r/vahidaghayev/artes-nginx)
 
 ### Database
-* **Image:** [`vahidaghayev/artes-db`](https://hub.docker.com/r/vahidaghayev/artes-db)
+
+- **Image:** [`vahidaghayev/artes-db`](https://hub.docker.com/r/vahidaghayev/artes-db)
 
 ### Backend (API)
-* **Image:** [`vahidaghayev/artes-report-service`](https://hub.docker.com/r/vahidaghayev/artes-report-service)
-  
+
+- **Image:** [`vahidaghayev/artes-report-service`](https://hub.docker.com/r/vahidaghayev/artes-report-service)
+
 ### Frontend (UI)
-* **Image:** [`vahidaghayev/artes-report-ui`](https://hub.docker.com/r/vahidaghayev/artes-report-ui)
 
-
+- **Image:** [`vahidaghayev/artes-report-ui`](https://hub.docker.com/r/vahidaghayev/artes-report-ui)
 
 ## 🔧 Configuration
 
@@ -339,9 +346,9 @@ cd artes-reporting-system
 
 #### 2️⃣ Make Your Changes
 
-* Update backend logic (API, storage, preview, etc.)
-* Modify UI (design, fields, behavior)
-* Adjust database initialization if needed
+- Update backend logic (API, storage, preview, etc.)
+- Modify UI (design, fields, behavior)
+- Adjust database initialization if needed
 
 ---
 

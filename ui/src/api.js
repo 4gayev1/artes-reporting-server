@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "/api",
+  baseURL: "http://10.3.3.19/api",
 });
 
 export const getLogoURL = () => api.get("/logo-url");
