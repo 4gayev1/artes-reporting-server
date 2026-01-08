@@ -255,6 +255,8 @@ services:
   db:
     image: vahidaghayev/artes-db:latest
     restart: unless-stopped
+    ports:
+      - "5432:5432"
     environment:
       POSTGRES_DB: artes_reports
       POSTGRES_USER: artes
