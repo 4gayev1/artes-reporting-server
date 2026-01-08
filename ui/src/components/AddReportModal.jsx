@@ -12,12 +12,12 @@ export default function AddReportModal({
   const [name, setName] = useState("");
   const [project, setProject] = useState("");
   const [type, setType] = useState("");
-  const [loading, setLoading] = useState(false); 
+  const [loading, setLoading] = useState(false);
 
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (!name || !file) return alert("Name and file fields are required!");
-    setLoading(true); 
+    setLoading(true);
     try {
       const formData = new FormData();
       formData.append("file", file);
@@ -147,8 +147,12 @@ export default function AddReportModal({
           animation: spin 1s linear infinite;
         }
         @keyframes spin {
-          0% { transform: rotate(0deg); }
-          100% { transform: rotate(360deg); }
+          0% {
+            transform: rotate(0deg);
+          }
+          100% {
+            transform: rotate(360deg);
+          }
         }
       `}</style>
     </div>

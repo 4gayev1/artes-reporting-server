@@ -4,6 +4,7 @@ import {
   getProjects,
   getTypes,
   getLogoURL,
+  patchName,
 } from "../api";
 import dayjs from "dayjs";
 import { useSearchParams } from "react-router-dom";
@@ -17,10 +18,10 @@ import {
   FiSun,
   FiGrid,
   FiList,
+  FiEdit,
 } from "react-icons/fi";
 
 export default function ReportsPage() {
-
   const [searchParams, setSearchParams] = useSearchParams();
 
   /* -------------------- STATE -------------------- */
@@ -33,6 +34,8 @@ export default function ReportsPage() {
   const [darkMode, setDarkMode] = useState(true);
   const [animateMode, setAnimateMode] = useState(false);
   const [layout, setLayout] = useState("table");
+  const [editingReportId, setEditingReportId] = useState(null);
+  const [editingName, setEditingName] = useState("");
 
   const [pagination, setPagination] = useState({
     page: 1,
@@ -40,7 +43,6 @@ export default function ReportsPage() {
     total: 0,
     totalPages: 1,
   });
-
 
   const [filters, setFilters] = useState(() => ({
     name: searchParams.get("name") || "",
@@ -87,7 +89,7 @@ export default function ReportsPage() {
 
   const fetchReports = async (filterValues) => {
     const res = await getReports(filterValues);
-  
+
     setReports(res.data.reports);
     setPagination({
       page: res.data.page,
@@ -113,7 +115,7 @@ export default function ReportsPage() {
       [name]: value,
       page: name === "page" ? value : 1,
     };
-  
+
     setFilters(newFilters);
     syncUrl(newFilters);
     fetchReports(newFilters);
@@ -132,7 +134,7 @@ export default function ReportsPage() {
     }
     handleFilterChange(name, "");
   };
-  
+
   const toggleDarkMode = () => {
     setAnimateMode(true);
     setDarkMode((prev) => !prev);
@@ -141,7 +143,23 @@ export default function ReportsPage() {
 
   const toggleLayout = () =>
     setLayout((prev) => (prev === "grid" ? "table" : "grid"));
-  
+
+  const handleSaveName = async (id) => {
+    if (!editingName.trim()) return;
+
+    try {
+      await patchName(id, { name: editingName });
+      setReports((prev) =>
+        prev.map((r) => (r.id === id ? { ...r, name: editingName } : r)),
+      );
+    } catch (err) {
+      console.error(err);
+    } finally {
+      setEditingReportId(null);
+      setEditingName("");
+    }
+  };
+
   return (
     <div className="relative min-h-screen overflow-hidden">
       {animateMode && (
@@ -325,14 +343,42 @@ export default function ReportsPage() {
                 className={`rounded-xl shadow-lg p-5 relative transition-colors duration-500
                   ${darkMode ? "bg-gray-800 text-gray-100" : "bg-white text-gray-900"}`}
               >
-                <a
-                  href={r.report_url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="flex items-center text-xl font-bold text-blue-400 hover:text-blue-300 bg-transparent border-0 p-0 cursor-pointer"
-                >
-                  {r.name}
-                </a>
+                <div className="flex items-center gap-2">
+                  {editingReportId === r.id ? (
+                    <input
+                      type="text"
+                      value={editingName}
+                      onChange={(e) => setEditingName(e.target.value)}
+                      onKeyDown={(e) => {
+                        if (e.key === "Enter") handleSaveName(r.id);
+                      }}
+                      onBlur={() => handleSaveName(r.id)}
+                      className={`border px-2 py-1 rounded text-sm w-[50%] focus:outline-none
+      ${darkMode ? "bg-gray-700 text-gray-100 border-gray-600" : "bg-white text-gray-900 border-gray-300"}`}
+                      autoFocus
+                    />
+                  ) : (
+                    <div className="flex items-center gap-2">
+                      <a
+                        href={r.report_url}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="font-bold text-blue-400 hover:text-blue-300 truncate"
+                        title={r.name}
+                      >
+                        {r.name}
+                      </a>
+                      <FiEdit
+                        className="cursor-pointer text-gray-400 hover:text-gray-600"
+                        onClick={() => {
+                          setEditingReportId(r.id);
+                          setEditingName(r.name);
+                        }}
+                      />
+                    </div>
+                  )}
+                </div>
+
                 <div
                   className={`mt-2 space-y-1 ${darkMode ? "text-gray-300" : "text-gray-700"}`}
                 >
@@ -375,16 +421,40 @@ export default function ReportsPage() {
                     key={r.id}
                     className={`${darkMode ? "hover:bg-gray-700 border-gray-700" : "hover:bg-gray-50 border-gray-300"} border-b`}
                   >
-                    <td className="p-3 text-center">
-                      <a
-                        href={r.report_url}
-                        target="_blank"
-                        rel="noopener noreferrer"
-                        className="flex items-center justify-center font-bold text-blue-400 hover:text-blue-300 bg-transparent border-0 p-0 cursor-pointer truncate"
-                        title={r.name}
-                      >
-                        {r.name}
-                      </a>
+                    <td className="p-3 text-center flex justify-center items-center gap-2">
+                      {editingReportId === r.id ? (
+                        <input
+                          type="text"
+                          value={editingName}
+                          onChange={(e) => setEditingName(e.target.value)}
+                          onKeyDown={(e) => {
+                            if (e.key === "Enter") handleSaveName(r.id);
+                          }}
+                          onBlur={() => handleSaveName(r.id)}
+                          className={`border px-2 py-1 rounded text-sm w-[30%] focus:outline-none
+      ${darkMode ? "bg-gray-700 text-gray-100 border-gray-600" : "bg-white text-gray-900 border-gray-300"}`}
+                          autoFocus
+                        />
+                      ) : (
+                        <div className="flex items-center gap-2">
+                          <a
+                            href={r.report_url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="font-bold text-blue-400 hover:text-blue-300 truncate"
+                            title={r.name}
+                          >
+                            {r.name}
+                          </a>
+                          <FiEdit
+                            className="cursor-pointer text-gray-400 hover:text-gray-600"
+                            onClick={() => {
+                              setEditingReportId(r.id);
+                              setEditingName(r.name);
+                            }}
+                          />
+                        </div>
+                      )}
                     </td>
                     <td className="text-center">{r.project}</td>
                     <td className="text-center">{r.type}</td>
@@ -398,60 +468,60 @@ export default function ReportsPage() {
           </div>
         )}
 
-{/* Pagination */}
-{pagination.totalPages > 1 && (
-  <div className="flex justify-center items-center gap-2 mt-10">
-    {/* Prev */}
-    <button
-      disabled={pagination.page === 1}
-      onClick={() => changePage(pagination.page - 1)}
-      className={`px-4 py-2 rounded-lg font-medium transition
+        {/* Pagination */}
+        {pagination.totalPages > 1 && (
+          <div className="flex justify-center items-center gap-2 mt-10">
+            {/* Prev */}
+            <button
+              disabled={pagination.page === 1}
+              onClick={() => changePage(pagination.page - 1)}
+              className={`px-4 py-2 rounded-lg font-medium transition
         ${
           darkMode
             ? "bg-gray-700 text-gray-200 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500"
             : "bg-gray-200 text-gray-800 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
         }`}
-    >
-      Prev
-    </button>
+            >
+              Prev
+            </button>
 
-    {/* Page Numbers */}
-    {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
-      (p) => (
-        <button
-          key={p}
-          onClick={() => changePage(p)}
-          className={`w-10 h-10 rounded-lg font-semibold transition
+            {/* Page Numbers */}
+            {Array.from({ length: pagination.totalPages }, (_, i) => i + 1).map(
+              (p) => (
+                <button
+                  key={p}
+                  onClick={() => changePage(p)}
+                  className={`w-10 h-10 rounded-lg font-semibold transition
             ${
               p === pagination.page
                 ? darkMode
                   ? "bg-blue-500 text-white"
                   : "bg-blue-600 text-white"
                 : darkMode
-                ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
-                : "bg-gray-200 text-gray-800 hover:bg-gray-300"
+                  ? "bg-gray-700 text-gray-300 hover:bg-gray-600"
+                  : "bg-gray-200 text-gray-800 hover:bg-gray-300"
             }`}
-        >
-          {p}
-        </button>
-      )
-    )}
+                >
+                  {p}
+                </button>
+              ),
+            )}
 
-    {/* Next */}
-    <button
-      disabled={pagination.page === pagination.totalPages}
-      onClick={() => changePage(pagination.page + 1)}
-      className={`px-4 py-2 rounded-lg font-medium transition
+            {/* Next */}
+            <button
+              disabled={pagination.page === pagination.totalPages}
+              onClick={() => changePage(pagination.page + 1)}
+              className={`px-4 py-2 rounded-lg font-medium transition
         ${
           darkMode
             ? "bg-gray-700 text-gray-200 hover:bg-gray-600 disabled:bg-gray-800 disabled:text-gray-500"
             : "bg-gray-200 text-gray-800 hover:bg-gray-300 disabled:bg-gray-100 disabled:text-gray-400"
         }`}
-    >
-      Next
-    </button>
-  </div>
-)}
+            >
+              Next
+            </button>
+          </div>
+        )}
 
         {showModal && (
           <AddReportModal

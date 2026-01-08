@@ -12,6 +12,8 @@ const { getProjects } = require("../controllers/getProjects");
 const { uploadLogo } = require("../controllers/uploadLogo");
 const { uploadReport } = require("../controllers/uploadReport");
 
+const { changeReportName } = require("../controllers/changeReportName");
+
 const { deleteById } = require("../controllers/deleteById");
 const { deleteAll } = require("../controllers/deleteAll");
 
@@ -29,6 +31,8 @@ router.get("/projects", getProjects);
 
 router.post("/report", upload.single("file"), uploadReport);
 router.post("/logo", upload.single("file"), uploadLogo);
+
+router.patch("/report/:id", changeReportName);
 
 router.delete("/report/:id", deleteById);
 router.delete("/reports", deleteAll);

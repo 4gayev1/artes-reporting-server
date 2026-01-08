@@ -1,7 +1,7 @@
 import axios from "axios";
 
 const api = axios.create({
-  baseURL: "http://10.3.3.19/api",
+  baseURL: "/api",
 });
 
 export const getLogoURL = () => api.get("/logo-url");
@@ -9,6 +9,8 @@ export const getReports = (filters) => api.get("/reports", { params: filters });
 export const getReportById = (id) => api.get(`/preview/${id}`);
 export const getProjects = () => api.get("/projects");
 export const getTypes = () => api.get("/types");
+
+export const patchName = (id, data) => api.patch(`/report/${id}`, data);
 
 export const addReport = (data) =>
   api.post("/report", data, {
