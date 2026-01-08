@@ -270,6 +270,7 @@ services:
       MINIO_ROOT_USER: artes
       MINIO_ROOT_PASSWORD: artes123
     ports:
+      - "9000:9000"
       - "9001:9001"
     volumes:
       - minio_data:/data
